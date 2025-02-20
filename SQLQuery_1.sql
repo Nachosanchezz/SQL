@@ -77,10 +77,10 @@ SELECT
         -- Cálculo de la tasa de variación en porcentaje
     CASE  -- CASE es un if en SQL, es decir, si se cumple la condición, entonces se hace una cosa, si no, se hace otra.
         
-        WHEN LAG(COUNT(*)) OVER (
-            ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
-        ) IS NULL 
-        THEN NULL
+        WHEN LAG(COUNT(*)) OVER (                                          -- Estas tres líneas comentadas es para explicar como se usa el OVER       
+            ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))   -- Tu tienes una tabla con el dato super desagregado y quieres saber cuantos ''clientes'' o lo que sea, el año pasado,   
+        ) IS NULL                                                         -- pues te creas otra tabla con todos los clientes y hago una op que te diga las ventas de t-1. Luego me creo otra tabla con las ventas del cliente y las ventas de t...
+        THEN NULL                                                         -- Hacer todo esto es un rollo, por eso tenemos el SQL. La funcióon Over te lo calcula y te lo agrupa por año, te hace las dos operaciones en una sola función. OVER te coge la venta del año pasado me la vas a agrupar por año y me vas a hacer la suma.
         ELSE 
             ROUND(
                 100.0 * (COUNT(*) - LAG(COUNT(*)) OVER (
@@ -94,3 +94,8 @@ SELECT
 FROM [DATAEX].[001_sales]
 GROUP BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
 ORDER BY Año DESC;
+
+-- Este azure se conecta directamente con el Visual Studio Code, por lo que se puede hacer directamente en el Visual Studio Code.
+
+-- Calcula las ventas por año y mes y su tasa de variación.
+
