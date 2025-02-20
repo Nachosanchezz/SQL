@@ -63,3 +63,34 @@ FROM [DATAEX].[001_sales]
 WHERE YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) = 2023  -- El Where es importante para filtrar el año
 GROUP BY CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)
 ORDER BY Total_Ventas DESC;
+
+
+-- Calcula la tasa de variación por año
+
+SELECT
+    YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) AS Año,
+    COUNT(*) AS Total_Ventas,
+    LAG(COUNT(*)) OVER (                                                -- LAG es para coger el valor anterior 
+        ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+        ) AS Total_Ventas_Anterior,
+
+        -- Cálculo de la tasa de variación en porcentaje
+    CASE  -- CASE es un if en SQL, es decir, si se cumple la condición, entonces se hace una cosa, si no, se hace otra.
+        
+        WHEN LAG(COUNT(*)) OVER (
+            ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+        ) IS NULL 
+        THEN NULL
+        ELSE 
+            ROUND(
+                100.0 * (COUNT(*) - LAG(COUNT(*)) OVER (
+                                ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+                            )) 
+                / NULLIF(LAG(COUNT(*)) OVER (
+                                ORDER BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+                            ), 0), 2)
+    END AS Tasa_Variacion_Porcentual
+
+FROM [DATAEX].[001_sales]
+GROUP BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+ORDER BY Año DESC;
