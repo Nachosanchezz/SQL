@@ -99,3 +99,70 @@ ORDER BY Año DESC;
 
 -- Calcula las ventas por año y mes y su tasa de variación.
 
+SELECT 
+    YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) AS Año,
+    MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) AS Mes,
+    COUNT(*) AS Total_Ventas,
+    LAG(COUNT(*)) OVER (PARTITION BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) 
+                        ORDER BY MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))) AS Ventas_Mes_Anterior,
+    CASE 
+        WHEN LAG(COUNT(*)) OVER (PARTITION BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) 
+                                 ORDER BY MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))) IS NULL 
+        THEN NULL
+        ELSE 
+            ROUND(
+                100.0 * (COUNT(*) - LAG(COUNT(*)) OVER (PARTITION BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) 
+                                                         ORDER BY MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))))
+                / NULLIF(LAG(COUNT(*)) OVER (PARTITION BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)) 
+                                             ORDER BY MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))), 0), 2)
+    END AS Tasa_Variacion_Porcentual
+FROM [DATAEX].[001_sales]
+GROUP BY YEAR(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE)), 
+         MONTH(CAST(CONVERT(DATE, Sales_Date, 103) AS DATE))
+ORDER BY Año DESC, Mes DESC;
+
+
+-- JOINTS en SQL: Ejemplo: Yo estoy haciendo una consulta en la tabla de ventas, y quiero saber de x venta que categoría de producto es, pues hacemos un Joint
+-- con otra tabla de producto. Entonces habra en cada tabla un id de producto. Tendra que haber una cardinalidad de varios a uno (si mi modelo está bien hecho)
+-- También podría ser que en la tabla haya un producto x que en la tabla de ventas no esté, entonces cuando hacemos este tipo de consultas lo que queremos es 
+-- mostrar (haciendo un inner joint, por ejemplo) solo los productos que estén en ambas tablas. 
+-- Lo que te puede interesar es sacar todas las ventas y si no está en alguna tabla, pues pones un 0 (o un círculo), eso se llama left joint. Que es, cógeme
+-- todos los datos y los que coinciden con la tabla de ventas, pues me los pones, y los que no, pues me pones un 0.
+-- (HAY UNA FOTO CON ESQUEMA EN EL AULA VIRTUAL)
+-- Si yo quiero coger otra tabla (la de Geo) y hago un left join voy a capturar toda la realidad de mi tabla de ventas.
+-- Antes de hacer la consulta al SQL hay que pensar muy bien que es lo que quiero.
+
+-- Cuando haces una venta y tienes un cliente con un cierto id (con un sistema transaccional(cuadno pones la tarjeta en el datafono sale el id del cliente)), 
+-- Luego el vendedor pondrá tus datos: nombre, apellido, sexo... Pero con este id puede haber duplicidades debido a que ese cliente ha comprado varias veces.
+-- Entonces, en la tabla de ventas, el id del cliente no es único, por lo que no puedo hacer un joint con la tabla de clientes. Entonces, lo que hago es hacer
+-- un joint con la tabla de clientes, pero con el id de la venta. Entonces, en la tabla de ventas, el id de la venta es único, por lo que puedo hacer un joint
+-- con la tabla de clientes.
+-- Amazon no tiene este problema porque estás loggeado, por ejemplo.
+
+
+-- Joint ejemplo con codigo
+
+-- Dame los productos por forma de pago
+SELECT
+    Id_Producto, 
+    FORMA_PAGO,
+    COUNT(*) AS Total_Financiaciones
+FROM [DATAEX].[001_sales] sales
+left join [DATAEX].[010_forma_pago] fp
+on sales.FORMA_PAGO_ID = fp.FORMA_PAGO_ID
+GROUP BY Id_Producto, FORMA_PAGO
+ORDER BY Total_Financiaciones DESC;
+
+
+-- Dame los modelos por forma de pago = 3
+SELECT
+    MODELO,
+    COUNT(*) AS Total_Financiaciones
+FROM [DATAEX].[001_sales] sales
+left join [DATAEX].[010_forma_pago] fp
+on sales.FORMA_PAGO_ID = fp.FORMA_PAGO_ID
+left join [DATAEX].[006_producto] prod 
+on sales .Id_Producto = prod.Id_Producto
+WHERE fp.FORMA_PAGO_ID = 3
+GROUP BY MODELO
+ORDER BY Total_Financiaciones DESC;
