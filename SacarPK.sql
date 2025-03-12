@@ -158,3 +158,113 @@ SELECT COUNT(DISTINCT Sales_Date) AS Unicos_Id_Producto, COUNT(*) AS Total_Filas
 
 SELECT COUNT(DISTINCT Sales_Date) AS Unicos_Id_Producto, COUNT(*) AS Total_Filas
   FROM [DATAEX].[018_edad]
+
+SELECT 
+    (SELECT COUNT(DISTINCT Sales_Date) FROM [DATAEX].[001_sales]) AS Fechas_Sales,
+    (SELECT COUNT(DISTINCT Sales_Date) FROM [DATAEX].[017_logist]) AS Fechas_Logist;
+
+
+SELECT COUNT(*) AS Coincidencias
+FROM [DATAEX].[001_sales] s
+JOIN [DATAEX].[017_logist] l ON s.Sales_Date = l.Sales_Date;
+
+SELECT s.Sales_Date, COUNT(s.CODE) AS Ventas, COUNT(l.Sales_Date) AS Registros_Logist
+FROM [DATAEX].[001_sales] s
+LEFT JOIN [DATAEX].[017_logist] l ON s.Sales_Date = l.Sales_Date
+GROUP BY s.Sales_Date
+ORDER BY Ventas DESC;
+
+
+ -- Si Coincidencias = Total_Sales = Total_Rev, la relación es 1:1 estricta.
+SELECT 
+    (SELECT COUNT(*) FROM [DATAEX].[016_origen_venta]) AS Total_Origen_Venta,
+    (SELECT COUNT(*) FROM [DATAEX].[017_logist]) AS Total_Logist,
+    (SELECT COUNT(*) FROM [DATAEX].[016_origen_venta] s JOIN [DATAEX].[017_logist] r ON s.Origen_Compra_ID = r.Origen_Compra_ID) AS Coincidencias
+
+SELECT COUNT(DISTINCT Modelo) AS Unicos_Modelo, COUNT(*) AS Total_Filas
+  FROM [DATAEX].[006_producto]
+
+SELECT COUNT(DISTINCT Mantenimiento_medio) AS Unicos_Modelo, COUNT(*) AS Total_Filas
+    FROM [DATAEX].[007_costes]
+
+SELECT 
+    (SELECT COUNT(*) FROM [DATAEX].[006_producto]) AS Total_Producto,
+    (SELECT COUNT(*) FROM [DATAEX].[007_costes]) AS Total_Costes,
+    (SELECT COUNT(*) FROM [DATAEX].[006_producto] s JOIN [DATAEX].[007_costes] r ON s.Modelo = r.Modelo) AS Coincidencias
+
+SELECT TOP (20) *
+  FROM [DATAEX].[007_costes]
+SELECT TOP (20) *
+  FROM [DATAEX].[006_producto]
+
+
+
+SELECT COUNT(DISTINCT CP) AS Unicos_Modelo, COUNT(*) AS Total_Filas
+    FROM [DATAEX].[019_Mosaic]
+
+SELECT TOP (20) *
+  FROM [DATAEX].[002_date]
+
+SELECT TOP (20) *
+  FROM [DATAEX].[018_edad]
+
+
+SELECT TOP (10) *
+  FROM [DATAEX].[001_sales]
+
+
+SELECT TOP (10) *
+  FROM [DATAEX].[002_date]
+
+
+SELECT TOP (10) *
+  FROM [DATAEX].[003_clientes]
+
+
+SELECT TOP (10) *
+  FROM [DATAEX].[004_rev]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[005_cp]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[006_producto]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[007_costes]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[008_cac]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[009_motivo_venta]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[010_forma_pago]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[011_tienda]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[012_provincia]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[013_zona]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[014_categoría_producto]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[015_fuel]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[016_origen_venta]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[017_logist]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[018_edad]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[019_Mosaic]
