@@ -224,8 +224,7 @@ SELECT TOP (10) *
 SELECT TOP (10) *
   FROM [DATAEX].[004_rev]
 
-SELECT TOP (10) *
-  FROM [DATAEX].[005_cp]
+
 
 SELECT TOP (10) *
   FROM [DATAEX].[006_producto]
@@ -265,6 +264,9 @@ SELECT TOP (10) *
 
 SELECT TOP (10) *
   FROM [DATAEX].[018_edad]
+
+SELECT TOP (10) *
+  FROM [DATAEX].[005_cp]
 
 SELECT TOP (10) *
   FROM [DATAEX].[019_Mosaic]
