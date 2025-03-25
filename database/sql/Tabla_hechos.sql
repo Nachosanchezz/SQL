@@ -1,41 +1,31 @@
 SELECT
-    s.CODE,                -- PK de sales
-    c.Customer_ID,         -- FK de clientes
-    prod.Id_Producto,         -- FK de producto
-    s.Sales_Date,          -- FK de fecha
-    fp.FORMA_PAGO_ID,       -- FK de forma_pago
-    mv.MOTIVO_VENTA_ID,     -- FK de motivo_venta
-    t.TIENDA_ID,           -- FK de tienda
-    s.PVP                 -- Precio de venta
-    prov.Provincia_ID      -- FK de provincia
-FROM [DATAEX].[001_sales] s
-LEFT JOIN [DATAEX].[002_date] d ON s.Sales_Date = d.Date
-LEFT JOIN [DATAEX].[003_clientes] c ON s.Customer_ID = c.Customer_ID
-LEFT JOIN [DATAEX].[006_producto] prod ON s.Id_Producto = prod.Id_Producto
-LEFT JOIN [DATAEX].[010_forma_pago] f ON s.FORMA_PAGO_ID = f.FORMA_PAGO_ID
-LEFT JOIN [DATAEX].[009_motivo_venta] m ON s.MOTIVO_VENTA_ID = m.MOTIVO_VENTA_ID
-LEFT JOIN [DATAEX].[011_tienda] t ON s.TIENDA_ID = t.TIENDA_ID
-LEFT JOIN [DATAEX].[012_provincia] p ON t.PROVINCIA_ID = p.PROVINCIA_ID
+    s.CODE AS Venta_ID,  -- PK de la tabla de ventas
+    s.Code_,             -- Fk de la tabla de productos
+    s.Customer_ID,       -- Fk de la tabla de clientes
+    s.PVP AS Precio_Venta,       
+    s.COSTE_VENTA_NO_IMPUESTOS, 
+    s.IMPUESTOS,                 
+    s.MANTENIMIENTO_GRATUITO,    
+    s.EN_GARANTIA,               
+    s.EXTENSION_GARANTIA,
+    CONVERT(DATE, s.FIN_GARANTIA, 103) AS Fecha_Fin_Garantia,     
+    s.SEGURO_BATERIA_LARGO_PLAZO,      
+    s.Id_Producto,       -- Fk de la tabla de productos
+    CONVERT(DATE,s.Sales_Date,103) AS Sales_Date,     -- Fk de la tabla de tiempo
+    s.TIENDA_ID,         -- Fk de la tabla de zona          
+    
+    -- Forma de pago
+    fp.FORMA_PAGO_ID,           
+    
+    -- Motivo de venta
+    mv.MOTIVO_VENTA_ID,          
 
-SELECT
-    s.CODE AS Venta_ID,          -- PK de la tabla de ventas
-    c.Customer_ID,               -- FK de clientes
-    p.Id_Producto,               -- FK de producto
-    d.Date AS Fecha,             -- FK de fecha
-    fp.FORMA_PAGO_ID,            -- FK de forma de pago
-    mv.MOTIVO_VENTA_ID,          -- FK de motivo de venta
-    t.TIENDA_ID,                 -- FK de tienda
-    z.ZONA_ID,                   -- FK de zona
-    prov.PROVINCIA_ID,           -- FK de provincia
-    s.PVP AS Precio_Venta,       -- Precio de venta
-    s.COSTE_VENTA_NO_IMPUESTOS,  -- Coste de venta sin impuestos
-    s.IMPUESTOS,                 -- Impuestos aplicados
-    s.MANTENIMIENTO_GRATUITO,    -- Si tiene mantenimiento gratuito
-    s.EN_GARANTIA,               -- Si está en garantía
-    s.EXTENSION_GARANTIA,        -- Si tiene extensión de garantía
-    s.SEGURO_BATERIA_LARGO_PLAZO,-- Si tiene seguro de batería a largo plazo
-    cost.Costetransporte,        -- Coste de transporte del producto
-    cost.GastosMarketing,        -- Gastos de marketing asociados al producto
+    -- Zona y Provincia               
+    z.ZONA_ID,                   
+    prov.PROVINCIA_ID,          
+    
+    cost.Costetransporte,        
+    cost.GastosMarketing        
 FROM [DATAEX].[001_sales] s
 -- Dimensión Fecha
 LEFT JOIN [DATAEX].[002_date] d ON s.Sales_Date = d.Date
