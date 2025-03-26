@@ -1,5 +1,5 @@
 SELECT
-    s.CODE AS Venta_ID,  -- PK de la tabla de ventas
+    s.CODE,  -- PK de la tabla de ventas
     s.Code_,             -- Fk de la tabla de productos
     s.Customer_ID,       -- Fk de la tabla de clientes
     s.PVP AS Precio_Venta,       

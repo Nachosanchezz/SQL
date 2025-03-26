@@ -1,7 +1,7 @@
 -- Dimensión de tiempo
 
 SELECT
-    d.Date AS Fecha,           -- PK de la tabla de tiempo
+    CONVERT(DATE, d.Date, 103) AS Fecha,         -- PK de la tabla de tiempo
     d.Anno AS Año,                    -- Año
     d.Annomes AS Añomes,                 -- Año y mes combinado
     d.Mes,                     -- Mes del año
