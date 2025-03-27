@@ -23,11 +23,15 @@ SELECT
     -- Zona y Provincia               
     z.ZONA_ID,                   
     prov.PROVINCIA_ID,     
-
-    -- Quejas y mantenimiento
-    cac.DIAS_DESDE_LA_ULTIMA_ENTRADA_TALLER,
-    cac.DIAS_EN_TALLER,
-    cac.QUEJA,     
+    -- Revisiones
+    CONVERT(DATE, rev.DATE_UTIMA_REV, 103) AS DATE_ULTIMA_REVISION,
+    CASE
+        WHEN rev.DIAS_DESDE_ULTIMA_REVISION IS NULL OR rev.DIAS_DESDE_ULTIMA_REVISION = '' THEN 1
+        ELSE CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT)
+    END AS DIAS_DESDE_ULTIMA_REVISION,
+    rev.Km_medio_por_revision,
+    rev.km_ultima_revision,
+    rev.Revisiones,     
     
     -- Costes
     cost.Costetransporte,        
@@ -46,6 +50,30 @@ SELECT
 
     -- Edad del Coche.
     edad_coche.Car_Age,
+
+      -- Quejas y mantenimiento
+    cac.DIAS_DESDE_LA_ULTIMA_ENTRADA_TALLER,
+    cac.DIAS_EN_TALLER,
+    cac.QUEJA,
+
+    CASE
+    -- Caso 1: revisión reciente o sin revisión (0 a 400 días) ⇒ NO churn
+    WHEN TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) BETWEEN 0 AND 400 THEN 0
+
+    -- Caso 2: revisión muy antigua (> 400 días) ⇒ churn
+    WHEN TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) > 400 THEN 1
+
+    -- Caso 3: nulo o vacío ⇒ depender de la edad del coche
+    WHEN (rev.DIAS_DESDE_ULTIMA_REVISION IS NULL OR rev.DIAS_DESDE_ULTIMA_REVISION = '')
+        THEN CASE 
+            WHEN edad_coche.Car_Age >= 5 THEN 1  -- coches viejos sin revisión ⇒ churn
+            ELSE 0
+        END
+
+    -- Caso 4: cualquier otro valor inesperado ⇒ asumimos churn por precaución
+    ELSE 1
+END AS Tasa_Churn,
+
 
     --  Margen bruto: lo que se gana después de aplicar el margen, quitando los impuestos
 ROUND(s.PVP * cost.Margen / 100 * (1 - s.IMPUESTOS / 100.0), 2) AS Margen_Bruto_Euros,
@@ -70,7 +98,7 @@ CASE
     ELSE 0 
 END AS Hubo_Queja
 
-
+-- Tabla de ventas  
 FROM [DATAEX].[001_sales] s
 
 -- Dimensión Fecha
@@ -108,4 +136,5 @@ LEFT JOIN [DATAEX].[018_edad] edad_coche ON s.CODE = edad_coche.CODE
 
 LEFT JOIN [DATAEX].[008_cac] cac ON s.CODE = cac.CODE
 
-
+-- Dimensión Revisiones
+LEFT JOIN [DATAEX].[004_rev] rev ON s.CODE = rev.CODE
