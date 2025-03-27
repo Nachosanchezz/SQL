@@ -2,7 +2,7 @@ SELECT
     s.CODE,  -- PK de la tabla de ventas
     s.Code_,             -- Fk de la tabla de productos
     s.Customer_ID,       -- Fk de la tabla de clientes
-    s.PVP AS Precio_Venta,       
+    s.PVP,       
     s.COSTE_VENTA_NO_IMPUESTOS, 
     s.IMPUESTOS,                 
     s.MANTENIMIENTO_GRATUITO,    
