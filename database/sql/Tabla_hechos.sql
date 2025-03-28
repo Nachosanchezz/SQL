@@ -56,25 +56,35 @@ SELECT
     cac.DIAS_EN_TALLER,
     cac.QUEJA,
 
+        -- Tasa de Churn: Indica si la venta ha sido cancelada en los últimos 400 días (1) o no (0).
     CASE
-    -- Caso 1: revisión reciente o sin revisión (0 a 400 días) ⇒ NO churn
-    WHEN TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) BETWEEN 0 AND 400 THEN 0
-
-    -- Caso 2: revisión muy antigua (> 400 días) ⇒ churn
-    WHEN TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) > 400 THEN 1
-
-    -- Caso 3: nulo o vacío ⇒ depender de la edad del coche
-    WHEN (rev.DIAS_DESDE_ULTIMA_REVISION IS NULL OR rev.DIAS_DESDE_ULTIMA_REVISION = '')
-        THEN CASE 
-            WHEN edad_coche.Car_Age >= 5 THEN 1  -- coches viejos sin revisión ⇒ churn
-            ELSE 0
-        END
-
-    -- Caso 4: cualquier otro valor inesperado ⇒ asumimos churn por precaución
-    ELSE 1
-END AS Tasa_Churn,
-
-
+            -- Caso 1: Revisión reciente o sin revisión (0-400 días) - No churn.
+        WHEN
+            rev.DIAS_DESDE_ULTIMA_REVISION IS NOT NULL AND
+            rev.DIAS_DESDE_ULTIMA_REVISION <> '' AND
+            TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) BETWEEN 0 AND 400
+        THEN 0
+            -- Caso 2: Revisión muy antigua (>400 días) - Churn.
+        WHEN
+            rev.DIAS_DESDE_ULTIMA_REVISION IS NOT NULL AND
+            rev.DIAS_DESDE_ULTIMA_REVISION <> '' AND
+            TRY_CAST(REPLACE(rev.DIAS_DESDE_ULTIMA_REVISION, '.', '') AS INT) > 400
+        THEN 1
+            -- Caso 3: Valor nulo o vacío - decidir según la edad del coche.
+        WHEN rev.DIAS_DESDE_ULTIMA_REVISION IS NULL
+            OR rev.DIAS_DESDE_ULTIMA_REVISION = ''
+        THEN
+            CASE
+                -- Subcaso 3.1: Coche nuevo (≤1 años) - No churn.
+                WHEN edad_coche.Car_Age <= 1 THEN 0
+                -- Subcaso 3.2: Coche viejo (>1 años) - Churn.
+                WHEN edad_coche.Car_Age > 1 THEN 1
+                -- Subcaso 3.3: Sin info de edad (nulo) - Churn por defecto: 2% de datos.
+                ELSE 1
+            END
+            -- Caso 4: Otros valores inesperados - Churn por precaución.
+        ELSE 1
+    END AS Tasa_Churn,
     --  Margen bruto: lo que se gana después de aplicar el margen, quitando los impuestos
 ROUND(s.PVP * cost.Margen / 100 * (1 - s.IMPUESTOS / 100.0), 2) AS Margen_Bruto_Euros,
 
@@ -138,3 +148,6 @@ LEFT JOIN [DATAEX].[008_cac] cac ON s.CODE = cac.CODE
 
 -- Dimensión Revisiones
 LEFT JOIN [DATAEX].[004_rev] rev ON s.CODE = rev.CODE
+
+
+
