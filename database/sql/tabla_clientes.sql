@@ -40,8 +40,7 @@ SELECT
     f.EN_GARANTIA,                   -- Si está en garantía
     f.EXTENSION_GARANTIA,            -- Si hay extensión de garantía
 
-    -- 🔹 Variables económicas y de rentabilidad
-    f.Margen,                        -- Margen sobre PVP (%)
+    -- 🔹 Variables económicas y de rentabilidad                        
     f.Margendistribuidor,           -- Margen para el distribuidor (%)
     f.Costetransporte,              -- Coste de transporte
     f.GastosMarketing,              -- Gastos de marketing

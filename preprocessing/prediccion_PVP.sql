@@ -13,8 +13,6 @@ SELECT
     AVG(s.Car_Age) AS Edad_Media_Coche,  -- Edad media del coche en cada grupo de PVP
     AVG(s.km_ultima_revision) AS Km_Medio_Por_Revision,  -- Kilometraje medio entre revisiones, por grupo de PVP
     AVG(ISNULL(s.Revisiones, 0)) AS Revisiones_Media,  -- Número medio de revisiones por grupo, imputando los nulos como 0
-    AVG(s.Margen) AS Margen, -- Margen medio por grupo de PVP
-
     AVG(CAST(Tasa_Churn AS FLOAT)) AS churn_percentage  -- Porcentaje medio de churn en cada grupo de PVP
     
 FROM [dbo].[tabla_hechos] s
