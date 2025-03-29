@@ -1,5 +1,6 @@
 -- Declaración de Variables.
 DECLARE
+     @discount_rate FLOAT = 0.07,  -- Tasa de descuento del 7%.
     -- Coeficientes del modelo de churn.
     @b_intercepto FLOAT,
     @b_pvp FLOAT,
@@ -13,7 +14,7 @@ SELECT
     @b_pvp        = MAX(CASE WHEN Variable = 'PVP' THEN Coeficiente END),
     @b_edad       = MAX(CASE WHEN Variable = 'Edad_Media_Coche' THEN Coeficiente END),
     @b_km         = MAX(CASE WHEN Variable = 'Km_Medio_Por_Revision' THEN Coeficiente END),
-    @b_revisiones = MAX(CASE WHEN Variable = 'Margen' THEN Coeficiente END)
+    @b_revisiones = MAX(CASE WHEN Variable = 'Revisiones_Media' THEN Coeficiente END)
 FROM Tasa_Churn;
 
 -- CTE Retención: Calcular la probabilidad de retención para cada cliente.
@@ -26,7 +27,7 @@ WITH retencion_cte AS (
                 AVG(f.PVP) * @b_pvp +
                 MAX(f.Car_Age) * @b_edad +
                 AVG(f.km_ultima_revision) * @b_km +
-                AVG(f.Margen_eur) * @b_revisiones
+                AVG(f.Revisiones) * @b_revisiones
             )
         )) AS retencion_estimado
     FROM dim_clientes c
